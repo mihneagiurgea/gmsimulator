@@ -45,38 +45,26 @@ class VersusSimulator(object):
         Returns:
             A dict containing the simulation result.
         """
-        self.game_state = VersusGameState(self.unit1, self.unit2, self.distance)
-
-        strategy1 = self.unit1.get_strategy(self.game_state)
-        strategy2 = self.unit2.get_strategy(self.game_state)
-
         # Randomize turn order.
         if first_to_act is None:
             first_to_act = random.randint(1, 2)
-        turn_order = [strategy1, strategy2]
+        turn_order = [self.unit1, self.unit2]
         if first_to_act == 2:
             turn_order.reverse()
+
+        self.game_state = VersusGameState(turn_order, self.distance)
 
         if debug:
             print('\tTurn order:\n1. %s\n2. %s' % (turn_order[0], turn_order[1]))
 
         # Fight!
         while self.game_state.alive:
-            # New round.
-            self.game_state.round += 1
-
-            for strategy in turn_order:
-                strategy.act()
-                if not self.game_state.alive:
-                    break
+            unit = self.game_state.active_unit
+            unit.act(self.game_state)
+            self.game_state.next_turn()
 
             if debug:
                 print self.game_state
 
         # Combat has ended, we have a winner.
-        if self.game_state.current_hp[self.unit1] > 0:
-            winner = self.unit1
-        else:
-            winner = self.unit2
-
-        return winner
+        return self.game_state.winner

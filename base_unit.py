@@ -41,6 +41,6 @@ class BaseUnit(object):
     def run_distance(self):
         return 2 * self.speed
 
-    def get_strategy(self, game_state):
-        """Returns an instance of the Strategy class used."""
-        return strategy.MeleeRangedStrategy(self, game_state)
+    def act(self, game_state):
+        """Use the associated strategy class to act."""
+        strategy.MeleeRangedStrategy.act(self, game_state)
