@@ -1,4 +1,4 @@
-from utils import check_d20_roll
+from utils import check_d20_roll, d20_roll_hit_chance
 
 class VersusGameState(object):
     """Represents the state of a single 1v1 game.
@@ -88,5 +88,5 @@ class VersusGameState(object):
 
     def spell_cast(self, attacker, defender):
         """Offensive spell cast."""
-        if check_d20_roll(attacker, defender.spell_resistance):
+        if check_d20_roll(0, defender.spell_resistance):
             self._deal_damage(defender, attacker.spell_damage)

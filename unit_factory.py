@@ -27,3 +27,11 @@ class UnitFactory(object):
             wc=13,
             ac=23,
         )
+
+    @classmethod
+    def create_mage(cls):
+        return Unit(name = cls.generate_name('Mage'),
+            hp=45,
+            ac=13,
+            spell_damage=21
+        )

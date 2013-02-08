@@ -1,21 +1,30 @@
 from versus_simulator import VersusSimulator
 from unit_factory import UnitFactory
-from strategy import WarriorStrategy
+import strategy
 
 def main():
     unit1 = UnitFactory.create_warrior()
-    unit2 = UnitFactory.create_malak()
+    unit2 = UnitFactory.create_warrior()
 
-    simulator = VersusSimulator(unit1, WarriorStrategy, unit2, WarriorStrategy)
-    wins1, wins2 = simulator.determine_win_percentage()
+    simulator = VersusSimulator(unit1, strategy.WarriorStrategy,
+                                unit2, strategy.WarriorStrategy)
+    a1w1, a1w2 = simulator.determine_win_percentage(first_to_act=1)
+    a2w1, a2w2 = simulator.determine_win_percentage(first_to_act=2)
+    simulations_count = a1w1 + a1w2 + a2w1 + a2w2
+
+    results = [
+        (unit1, a1w1, a1w2),
+        (unit2, a2w1, a2w2)
+    ]
 
     # Print simulation report
     print '=====Simulation report====='
     print '%r\n\tvs\n%r' % (unit1, unit2)
+    print 'Results after running %d simulations:\n' % simulations_count
 
-    if wins1 == wins2:
-        print 'It was a tie: %d vs %d wins' % (wins1, wins2)
-    else:
+    for unit, wins1, wins2 in results:
+        print 'When %s starts, winner is:' % unit
+
         total = wins1 + wins2
         if wins1 > wins2:
             winner = unit1
@@ -24,10 +33,9 @@ def main():
             winner = unit2
             wins_count = wins2
         win_percentage = 100.0 * wins_count / total
-        print 'Overall winner: %s' % winner
-        print 'Win percentage: %.2f%% (%d/%d)' % \
-              (win_percentage, wins_count, total)
-    # print 'We have a winner: %s' % simulator.simulate()
+        print '%15s with %.0f%%' % (winner, win_percentage)
+
+    # print 'We have a winner: %s' % simulator.simulate(debug=True)
 
 if __name__ == '__main__':
     main()
