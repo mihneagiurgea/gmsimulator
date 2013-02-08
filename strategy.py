@@ -36,30 +36,19 @@ class MeleeRangedStrategy(BaseVersusStrategy):
         # This solves W*.
         if self.unit.spell_damage == 0:
             self._act_melee()
-
+            return
 
         # If I don't have any melee capabilities, just fallback to ranged.
         # This solves M*.
-        if self.unit.melee_damage == 0:
+        if self.unit.damage == 0:
             self._act_ranged()
+            return
 
         # We can assume at this point that we have both melee and ranged
         # capabilities. We're trying to solve H*.
         # TODO - if this code would cover all cornercases, then it would also
         # solve W* and H*.
-
-
-        # How fast can I kill you using spells?
-        ttk_spell_cast_me = self.game_state.ttk_spell_cast(self.unit, self.opponent)
-        # How fast can the opponent kill me using spells?
-        ttk_spell_cast_opp = self.game_state.ttk_spell_cast(self.opponent, self.unit)
-
-        if ttk_spell_cast_me > ttk_spell_cast_opp:
-            # If I can kill you using spells faster than you can kill me,
-            # then I'll just nuke you!
-            # This solves cases 4, 5, 6
-            self._act_ranged()
-
+        raise NotImplemented()
 
     def _act_melee(self):
         if self.game_state.distance == 1:

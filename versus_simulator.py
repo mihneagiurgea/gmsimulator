@@ -7,8 +7,7 @@ MAP_WIDTH = 24
 class VersusSimulator(object):
     """Versus (1v1) simulator"""
 
-    def __init__(self, unit1, strategy_class1, unit2, strategy_class2,
-                 distance=MAP_WIDTH-1):
+    def __init__(self, unit1, unit2, distance=MAP_WIDTH-1):
         """
         Args:
             distance: The distance between the 2 fighting units (equal to
@@ -17,8 +16,6 @@ class VersusSimulator(object):
         """
         self.unit1 = unit1
         self.unit2 = unit2
-        self.strategy_class1 = strategy_class1
-        self.strategy_class2 = strategy_class2
         self.distance = distance
 
     def determine_win_percentage(self, first_to_act=None, simulation_count=250):
@@ -50,8 +47,8 @@ class VersusSimulator(object):
         """
         self.game_state = VersusGameState(self.unit1, self.unit2, self.distance)
 
-        strategy1 = self.strategy_class1(self.unit1, self.game_state)
-        strategy2 = self.strategy_class2(self.unit2, self.game_state)
+        strategy1 = self.unit1.get_strategy(self.game_state)
+        strategy2 = self.unit2.get_strategy(self.game_state)
 
         # Randomize turn order.
         if first_to_act is None:

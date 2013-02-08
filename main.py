@@ -1,13 +1,11 @@
 from versus_simulator import VersusSimulator
 from unit_factory import UnitFactory
-import strategy
 
 def main():
     unit1 = UnitFactory.create_warrior()
     unit2 = UnitFactory.create_warrior()
 
-    simulator = VersusSimulator(unit1, strategy.WarriorStrategy,
-                                unit2, strategy.WarriorStrategy)
+    simulator = VersusSimulator(unit1, unit2, )
     a1w1, a1w2 = simulator.determine_win_percentage(first_to_act=1)
     a2w1, a2w2 = simulator.determine_win_percentage(first_to_act=2)
     simulations_count = a1w1 + a1w2 + a2w1 + a2w2
