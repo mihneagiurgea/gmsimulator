@@ -34,7 +34,7 @@ def main():
         print '%15s with %.0f%%' % (winner, win_percentage)
 
     print '\n=====Showing a single simulation=====\n'
-    simulator.simulate(verbosity=2)
+    simulator.simulate(verbosity=3)
 
 if __name__ == '__main__':
     main()

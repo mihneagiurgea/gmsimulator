@@ -35,6 +35,9 @@ class VersusGameState(object):
                 if self._active_turn == 0:
                     print '===Round %d===' % self.round
             self.active_unit.act(self)
+            if self.verbosity >= 2:
+                # print 'End of %s\'s turn:\n\t%r' % (self.active_unit, self)
+                print '\t%r' % self
             if self.alive:
                 self.next_turn()
         if self.verbosity >= 1:
@@ -45,9 +48,6 @@ class VersusGameState(object):
 
     def next_turn(self):
         """Ends the current turn."""
-        if self.verbosity >= 2:
-            # print 'End of %s\'s turn:\n\t%r' % (self.active_unit, self)
-            print '\t%r' % self
         self._active_turn += 1
         if self._active_turn == 2:
             # End of a round.
@@ -103,8 +103,14 @@ class VersusGameState(object):
         self._current_hp[unit] -= value
         # print '%s was dealt %d damage' % (unit, value)
 
+    def _log_action(self, unit, message):
+        if self.verbosity >= 3:
+            print '%s: %s' % (unit, message)
+
     def move_towards(self, unit, distance):
         """Move towards your opponent."""
+        self._log_action(unit, 'move %d' % distance)
+
         if distance >= self.distance:
             raise ValueError('Invalid distance: %d/%d' % (distance, self.distance))
         if distance > 2 * unit.speed or distance <= 0:
@@ -114,6 +120,8 @@ class VersusGameState(object):
 
     def attack_full_melee(self, attacker):
         """Full melee attack (2 attacks, 2nd with -5 WC)."""
+        self._log_action(attacker, 'Full melee attack')
+
         if self.distance != 1:
             raise ValueError('Can only attack adjacent units.')
         self._process_single_melee_attack(attacker)
@@ -121,6 +129,8 @@ class VersusGameState(object):
 
     def attack_melee(self, attacker):
         """Single melee attack."""
+        self._log_action(attacker, 'Single melee attack')
+
         if self.distance != 1:
             raise ValueError('Can only attack adjacent units.')
         self._process_single_melee_attack(attacker)
@@ -128,6 +138,8 @@ class VersusGameState(object):
     def charge(self, attacker):
         """Attacker performs a charge (move > speed) against defender, or
         a move action followed by an attack."""
+        self._log_action(attacker, 'Charge-attack')
+
         if not (attacker.speed < self.distance <= 2 * attacker.speed):
             raise ValueError('Invalid charge distanct: %d' % self.distance)
         self.move_towards(attacker, self.distance-1)
@@ -143,6 +155,8 @@ class VersusGameState(object):
 
     def spell_cast(self, attacker):
         """Offensive spell cast."""
+        self._log_action(attacker, 'Spell cast attack')
+
         defender = self.get_opponent(attacker)
         dmg = self._get_dmg_spell_cast(attacker, defender)
         if dmg is not None:

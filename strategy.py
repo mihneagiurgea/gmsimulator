@@ -119,6 +119,7 @@ class MeleeRangedStrategy(object):
     def _act_adjacent(self, unit, game_state):
         dmg_melee = game_state.get_dps_full_melee(unit)
         dmg_ranged = game_state.get_dps_spell_cast(unit)
+        # print '%s choices: %.2f melee vs %.2f ranged' % (unit, dmg_melee, dmg_ranged)
         if dmg_melee >= dmg_ranged:
             game_state.attack_full_melee(unit)
         else:
