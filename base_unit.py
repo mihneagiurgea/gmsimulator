@@ -1,5 +1,3 @@
-import strategy
-
 class BaseUnit(object):
     """Abstract base class for a unit.
 
@@ -7,7 +5,7 @@ class BaseUnit(object):
     """
 
     # List mapping internal attributes names to their actual names.
-    # Must be implemented by subclasses.
+    # Must be set by subclasses.
     ATTRIBUTES = None
 
     # All units have a base speed of 5 for now.
@@ -21,6 +19,8 @@ class BaseUnit(object):
 
         if kwargs:
             raise ValueError('Invalid attributes: %s' % kwargs)
+
+        self.strategy = None
 
     def __repr__(self):
         pieces = []
@@ -43,4 +43,6 @@ class BaseUnit(object):
 
     def act(self, game_state):
         """Use the associated strategy class to act."""
-        strategy.MeleeRangedStrategy.act(self, game_state)
+        if self.strategy is None:
+            raise AttributeError('Cannot act - missing strategy.')
+        self.strategy.act(self, game_state)

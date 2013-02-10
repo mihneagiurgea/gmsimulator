@@ -1,5 +1,6 @@
 from versus_simulator import VersusSimulator
 from unit_factory import UnitFactory
+import strategy
 
 def main():
     unit1 = UnitFactory.create_warrior()

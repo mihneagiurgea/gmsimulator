@@ -16,18 +16,20 @@ class MeleeRangedStrategy(object):
       HH - Hybrid vs Hybrid
     """
 
-    @classmethod
-    def act(cls, unit, game_state):
+    def __init__(self):
+        pass
+
+    def act(self, unit, game_state):
         # If I don't have any ranged capabilities, just fallback to melee.
         # This solves W*.
         if unit.spell_damage == 0:
-            cls._act_melee(unit, game_state)
+            self._act_melee(unit, game_state)
             return
 
         # If I don't have any melee capabilities, just fallback to ranged.
         # This solves M*.
         if unit.damage == 0:
-            cls._act_ranged(unit, game_state)
+            self._act_ranged(unit, game_state)
             return
 
         # We can assume at this point that we have both melee and ranged
@@ -36,8 +38,7 @@ class MeleeRangedStrategy(object):
         # solve W* and H*.
         raise NotImplemented()
 
-    @classmethod
-    def _act_melee(cls, unit, game_state):
+    def _act_melee(self, unit, game_state):
         if game_state.distance == 1:
             # Adjacent, perform Full melee attack.
             game_state.attack_melee_full(unit)
@@ -54,6 +55,5 @@ class MeleeRangedStrategy(object):
         else:
             game_state.move_towards(unit, unit.run_distance)
 
-    @classmethod
-    def _act_ranged(cls, unit, game_state):
+    def _act_ranged(self, unit, game_state):
         game_state.spell_cast(unit)
