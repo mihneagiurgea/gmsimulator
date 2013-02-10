@@ -45,10 +45,10 @@ class VersusSimulator(object):
         Returns:
             A dict containing the simulation result.
         """
-        # Randomize turn order.
         if first_to_act is None:
             first_to_act = random.randint(1, 2)
         turn_order = [self.unit1, self.unit2]
+        # Randomize turn order.
         if first_to_act == 2:
             turn_order.reverse()
 

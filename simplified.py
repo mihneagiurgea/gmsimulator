@@ -19,18 +19,17 @@ class SimplifiedUnit(BaseUnit):
 class SimplifiedVersusGameState(VersusGameState):
     """Simplified - instead of rolling dice, just average damages dealt."""
 
-    def _process_single_melee_attack(self, attacker, defender, wc_modifier=0):
+    def _process_single_melee_attack(self, attacker, wc_modifier=0):
         """Reimplemented to represent a simplified melee attack."""
-        hit_chance = d20_roll_hit_chance(attacker.wc + wc_modifier, defender.ac)
-        avg_dmg = attacker.damage * (1.0 + attacker.critical_strike / 20.0)
-        attack_damage = hit_chance * avg_dmg
-        self._deal_damage(defender, attack_damage)
+        defender = self.get_opponent(attacker)
+        dmg = self._get_dps_single_melee_attack(attacker, defender, wc_modifier)
+        self._deal_damage(defender, dmg)
 
-    def spell_cast(self, attacker, defender):
+    def spell_cast(self, attacker):
         """Reimplemented to represent a simplified spell cast."""
-        hit_chance = d20_roll_hit_chance(0, defender.spell_resistance)
-        attack_damage = attacker.spell_damage * hit_chance
-        self._deal_damage(defender, attack_damage)
+        defender = self.get_opponent(attacker)
+        dmg = self.get_dps_spell_cast(attacker)
+        self._deal_damage(defender, dmg)
 
 class SimplifiedGM(object):
     """Determines the outcome of the Simplified GM version.
