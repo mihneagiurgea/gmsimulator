@@ -73,7 +73,7 @@ class VersusGameState(object):
 
         self.distance -= distance
 
-    def attack_melee_full(self, attacker):
+    def attack_full_melee(self, attacker):
         """Full melee attack (2 attacks, 2nd with -5 WC)."""
         if self.distance != 1:
             raise ValueError('Can only attack adjacent units.')
@@ -109,3 +109,27 @@ class VersusGameState(object):
         defender = self.get_opponent(attacker)
         if check_d20_roll(0, defender.spell_resistance):
             self._deal_damage(defender, attacker.spell_damage)
+
+    """ DPS - average Damage per Second (or Turn, in our case) """
+
+    def get_dps_full_melee(self, attacker):
+        """Compute the average DPS of a Full melee attack."""
+        defender = self.get_opponent(attacker)
+        return ( self._get_dps_single_melee_attack(attacked, defender) +
+                 self._get_dps_single_melee_attack(attacked, defender, -5) )
+
+    def get_dps_charge(self, attacker):
+        defender = self.get_opponent(attacker)
+        return self._get_dps_single_melee_attack(attacked, defender, -2)
+
+    def get_dps_spell_cast(self, attacker):
+        """Compute the average DPS of a Spell cast attack."""
+        defender = self.get_opponent(attacker)
+        hit_chance = d20_roll_hit_chance(0, defender.spell_resistance)
+        return attacker.spell_damage * hit_chance
+
+    def _get_dps_single_melee_attack(self, attacker, defender, wc_modifier=0):
+        """Computes the average damage of a single melee attack."""
+        hit_chance = d20_roll_hit_chance(attacker.wc + wc_modifier, defender.ac)
+        avg_dmg = attacker.damage * (1.0 + attacker.critical_strike / 20.0)
+        return hit_chance * avg_dmg
