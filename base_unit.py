@@ -27,8 +27,8 @@ class BaseUnit(object):
         for attribute, name in self.ATTRIBUTES:
             value = getattr(self, attribute)
             if value:
-                pieces.append('%s %s' % (value, name))
-        return '%s: %s' % (self.name, ' '.join(pieces))
+                pieces.append('%s: %s' % (name, value))
+        return '%s - %s' % (self.name, ' '.join(pieces))
 
     def __str__(self):
         return self.name

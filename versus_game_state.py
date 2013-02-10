@@ -30,12 +30,13 @@ class VersusGameState(object):
         """Resolve combat by fighting to the death!"""
         if self.verbosity >= 2:
             print('\tTurn order:\n1. %s\n2. %s' % (self.units[0], self.units[1]))
-            print '===Fight to the death!==='
         while self.alive:
+            if self.verbosity >= 2:
+                if self._active_turn == 0:
+                    print '===Round %d===' % self.round
             self.active_unit.act(self)
-            self.next_turn()
-        if self.verbosity >= 2:
-            print '===End of Round %d===\n' % self.round
+            if self.alive:
+                self.next_turn()
         if self.verbosity >= 1:
             print 'Combat lasted %d rounds:' % self.round
             print 'Winner: %s (%.2f HP)' % (self.winner, self[self.winner])
@@ -45,12 +46,11 @@ class VersusGameState(object):
     def next_turn(self):
         """Ends the current turn."""
         if self.verbosity >= 2:
-            print 'End of %s\'s turn:\n\t%r' % (self.active_unit, self)
+            # print 'End of %s\'s turn:\n\t%r' % (self.active_unit, self)
+            print '\t%r' % self
         self._active_turn += 1
         if self._active_turn == 2:
             # End of a round.
-            if self.verbosity >= 2:
-                print '===End of Round %d===\n' % self.round
             self._active_turn = 0
             self.round += 1
 
