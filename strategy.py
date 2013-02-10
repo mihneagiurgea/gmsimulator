@@ -1,3 +1,6 @@
+class InvalidVariant(ValueError):
+    pass
+
 class MeleeRangedStrategy(object):
     """Compute how fast each opponent can kill the other using ranged attacks,
     and decide if you should play ranged or melee.
@@ -17,8 +20,9 @@ class MeleeRangedStrategy(object):
       * Long-ranged: choose between moving towards your opponent (melee) and
         spell cast (ranged)
 
-    So, there are 3 distinct possible strategies, based on when to switch to
-    melee:
+    So, there are 3 distinct possible variants, based on when to switch to
+    Melee vs when to remain Ranged:
+
                 | Adjacent | Mid-range | Long-range |
     -------------------------------------------------
     Pure Ranged | best(M/R)| Ranged    | Ranged     |
@@ -29,25 +33,40 @@ class MeleeRangedStrategy(object):
     """
 
     PURE_RANGED = 1
-    HYBRID = 2
-    PURE_MELEE = 3
+    HYBRID = PURE_RANGED + 1
+    PURE_MELEE = HYBRID + 1
+    VARIANTS = (PURE_RANGED, HYBRID, PURE_MELEE)
 
-    def __init__(self, unit, switch_to_melee=None):
-        if switch_to_melee is None:
+    def __init__(self, unit, variant=None):
+        if variant is None:
             if unit.damage == 0:
-                switch_to_melee = MeleeRangedStrategy.PURE_RANGED
-            if unit.spell_damage == 0:
-                switch_to_melee = MeleeRangedStrategy.PURE_MELEE
+                variant = MeleeRangedStrategy.PURE_RANGED
+            elif unit.spell_damage == 0:
+                variant = MeleeRangedStrategy.PURE_MELEE
+            else:
+                variant = MeleeRangedStrategy.HYBRID
 
-        self.switch_to_melee = switch_to_melee
+        if variant not in MeleeRangedStrategy.VARIANTS:
+            raise ValueError('Invalid variant: %r' % variant)
 
-    def _switch_to_melee(self, mid_range=False, long_range=False):
+        # Validate that this is a correct variant value, with respect
+        # to the current unit.
+        if unit.damage == 0 and variant != MeleeRangedStrategy.PURE_RANGED:
+            raise InvalidVariant('Invalid variant value for unit with '
+                                 'no melee capabilities.')
+        if unit.spell_damage == 0 and variant != MeleeRangedStrategy.PURE_MELEE:
+            raise InvalidVariant('Invalid variant value for unit with '
+                                 'no ranged capabilities.')
+
+        self.variant = variant
+
+    def _variant(self, mid_range=False, long_range=False):
         """Should you switch to melee yet?"""
         if mid_range and not long_range:
-            return self.switch_to_melee >= MeleeRangedStrategy.HYBRID
+            return self.variant >= MeleeRangedStrategy.HYBRID
 
         if long_range and not mid_range:
-            return self.switch_to_melee == MeleeRangedStrategy.PURE_MELEE
+            return self.variant == MeleeRangedStrategy.PURE_MELEE
 
         raise ValueError('Choose mid_range XOR long_range')
 
@@ -60,7 +79,7 @@ class MeleeRangedStrategy(object):
             game_state.spell_cast(unit)
 
     def _act_mid_range(self, unit, game_state):
-        use_melee = self._switch_to_melee(mid_range=True)
+        use_melee = self._variant(mid_range=True)
         if use_melee:
 
             # Am I close enough to just move and make a single attack?
@@ -75,7 +94,7 @@ class MeleeRangedStrategy(object):
             game_state.spell_cast(unit)
 
     def _act_long_range(self, unit, game_state):
-        use_melee = self._switch_to_melee(long_range=True)
+        use_melee = self._variant(long_range=True)
         if use_melee:
             game_state.move_towards(unit, unit.run_distance)
         else:

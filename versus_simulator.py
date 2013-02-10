@@ -1,13 +1,11 @@
 import random
 
-from versus_game_state import VersusGameState
-
-MAP_WIDTH = 24
+from versus_game_state import VersusGameState, AveragingVersusGameState
 
 class VersusSimulator(object):
     """Versus (1v1) simulator"""
 
-    def __init__(self, unit1, unit2, distance=MAP_WIDTH-1):
+    def __init__(self, unit1, unit2, distance=None):
         """
         Args:
             distance: The distance between the 2 fighting units (equal to
@@ -52,19 +50,24 @@ class VersusSimulator(object):
         if first_to_act == 2:
             turn_order.reverse()
 
-        self.game_state = VersusGameState(turn_order, self.distance)
-
-        if debug:
-            print('\tTurn order:\n1. %s\n2. %s' % (turn_order[0], turn_order[1]))
-
-        # Fight!
-        while self.game_state.alive:
-            unit = self.game_state.active_unit
-            unit.act(self.game_state)
-            self.game_state.next_turn()
-
-            if debug:
-                print self.game_state
+        game_state = VersusGameState(turn_order, self.distance, debug=debug)
+        game_state.run_combat()
 
         # Combat has ended, we have a winner.
-        return self.game_state.winner
+        return game_state.winner
+
+    def simulate_averaging(self, first_to_act=None, debug=True):
+        """Simulation a single combat in which all d20 rolls are averaged.
+        """
+        if first_to_act is None:
+            first_to_act = random.randint(1, 2)
+        turn_order = [self.unit1, self.unit2]
+        # Randomize turn order, if needed.
+        if first_to_act == 2:
+            turn_order.reverse()
+
+        game_state = AveragingVersusGameState(turn_order, self.distance, debug=debug)
+        game_state.run_combat()
+
+        # Combat has ended, we have a winner.
+        return game_state

@@ -35,3 +35,15 @@ class UnitFactory(object):
             ac=13,
             spell_damage=21
         )
+
+    @classmethod
+    def create_hybrid(cls):
+        return Unit(name = cls.generate_name('Hybrid'),
+            hp=75,
+            damage=13,
+            wc=11,
+            ac=18,
+            critical_strike=2,
+            spell_damage=8,
+            spell_resistance=4
+        )

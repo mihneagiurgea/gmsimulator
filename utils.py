@@ -31,6 +31,26 @@ def d20_roll_hit_chance(modifier, target):
     min_roll = max(min_roll, 2)
     return (20 - min_roll + 1) / 20.0
 
+def argmax(d):
+    """The maximum argument of a dictionary.
+    >>> argmax({ 1: 17, 2: 93, 2: 52, })
+    2
+    """
+    best = max(d.itervalues())
+    for k in d:
+        if d[k] == best:
+            return k
+
+def argmin(d):
+    """The minimum argument of a dictionary.
+    >>> argmin({ 1: 17, 2: 93, 2: 52, })
+    1
+    """
+    best = min(d.itervalues())
+    for k in d:
+        if d[k] == best:
+            return k
+
 if __name__ == '__main__':
     import doctest
     doctest.testmod()

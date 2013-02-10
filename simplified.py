@@ -16,25 +16,6 @@ class SimplifiedUnit(BaseUnit):
 
     # Will inherit speed from BaseUnit.speed
 
-class SimplifiedVersusGameState(VersusGameState):
-    """Simplified - instead of rolling dice, just average damages dealt."""
-
-    def _get_dmg_single_melee_attack(self, attacker, defender, wc_modifier=0):
-        """Computes the outcome of a single melee attack.
-
-        Returns:
-            The damage dealt, or None, if the attack was a miss.
-        """
-        return self._get_dps_single_melee_attack(attacker, defender, wc_modifier)
-
-    def _get_dmg_spell_cast(self, attacker, defender):
-        """Computes the outcome of a spell cast attack.
-
-        Returns:
-            The damage dealt, or None, if the attack was a miss.
-        """
-        return self.get_dps_spell_cast(attacker, defender)
-
 class SimplifiedGM(object):
     """Determines the outcome of the Simplified GM version.
 

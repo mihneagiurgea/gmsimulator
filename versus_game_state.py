@@ -1,3 +1,4 @@
+import rules
 from utils import check_d20_roll, d20_roll_hit_chance
 
 class VersusGameState(object):
@@ -11,26 +12,50 @@ class VersusGameState(object):
       * spell cast
     """
 
-    def __init__(self, units, distance):
+    def __init__(self, units, distance=None, debug=False, verbosity=0):
+        # Default distance value.
+        if distance is None:
+            distance = rules.MAP_WIDTH-1
+
         self.units = units
         self._current_hp = { unit: unit.hp for unit in self.units }
         self.distance = distance
         self.round = 1
         self._active_turn = 0
+        if debug:
+            verbosity = 99
+        self.verbosity = verbosity
+
+    def run_combat(self):
+        """Resolve combat by fighting to the death!"""
+        if self.verbosity >= 2:
+            print('\tTurn order:\n1. %s\n2. %s' % (self.units[0], self.units[1]))
+            print '===Fight to the death!==='
+        while self.alive:
+            self.active_unit.act(self)
+            self.next_turn()
+        if self.verbosity >= 2:
+            print '===End of Round %d===\n' % self.round
+        if self.verbosity >= 1:
+            print 'Winner: %s (%.2f HP)' % (self.winner, self[self.winner])
+            print 'Loser : %s (%.2f HP)' % (self.loser, self[self.loser])
+            print 'HPDelta: %.2f' % self.hp_delta
 
     def next_turn(self):
         """Ends the current turn."""
+        if self.verbosity >= 2:
+            print 'End of %s\'s turn:\n\t%r' % (self.active_unit, self)
         self._active_turn += 1
         if self._active_turn == 2:
             # End of a round.
+            if self.verbosity >= 2:
+                print '===End of Round %d===\n' % self.round
             self._active_turn = 0
             self.round += 1
 
     def __repr__(self):
-        return '<%s Round %d: %s HP vs %s HP, distance: %d>' % \
-            (self.__class__.__name__, self.round,
-             self._current_hp[self.units[0]],
-             self._current_hp[self.units[1]],
+        return '<GameState Round %d: %s HP vs %s HP, distance: %d>' % \
+            (self.round, self[self.units[0]], self[self.units[1]],
              self.distance)
 
     def __getitem__(self, unit):
@@ -61,6 +86,15 @@ class VersusGameState(object):
         for unit, hp in self._current_hp.iteritems():
             if hp == max_hp:
                 return unit
+
+    @property
+    def loser(self):
+        return self.get_opponent(self.winner)
+
+    @property
+    def hp_delta(self):
+        hps = self._current_hp.values()
+        return max(hps) - min(hps)
 
     """Game actions - they might belong in a different class. """
 
@@ -162,3 +196,9 @@ class VersusGameState(object):
         hit_chance = d20_roll_hit_chance(attacker.wc + wc_modifier, defender.ac)
         avg_dmg = attacker.damage * (1.0 + attacker.critical_strike / 20.0)
         return hit_chance * avg_dmg
+
+class AveragingVersusGameState(VersusGameState):
+    """Average all d20 rolls, and use average damage instead."""
+
+    _get_dmg_single_melee_attack = VersusGameState._get_dps_single_melee_attack
+    _get_dmg_spell_cast = VersusGameState.get_dps_spell_cast
