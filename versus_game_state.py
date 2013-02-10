@@ -37,6 +37,7 @@ class VersusGameState(object):
         if self.verbosity >= 2:
             print '===End of Round %d===\n' % self.round
         if self.verbosity >= 1:
+            print 'Combat lasted %d rounds:' % self.round
             print 'Winner: %s (%.2f HP)' % (self.winner, self[self.winner])
             print 'Loser : %s (%.2f HP)' % (self.loser, self[self.loser])
             print 'HPDelta: %.2f' % self.hp_delta
@@ -93,8 +94,8 @@ class VersusGameState(object):
 
     @property
     def hp_delta(self):
-        hps = self._current_hp.values()
-        return max(hps) - min(hps)
+        """unit1.HP - unit2.HP"""
+        return self[self.units[0]] - self[self.units[1]]
 
     """Game actions - they might belong in a different class. """
 

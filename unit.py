@@ -1,7 +1,5 @@
 from base_unit import BaseUnit
 
-import strategy
-
 class Unit(BaseUnit):
     """A GM unit, capable of melee combat and/or simple damage-based spellcast.
     """
@@ -26,4 +24,3 @@ class Unit(BaseUnit):
         if not self.hp:
             raise ValueError('Units must have positive HP.')
 
-        self.strategy = strategy.MeleeRangedStrategy(self)

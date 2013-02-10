@@ -55,19 +55,3 @@ class VersusSimulator(object):
 
         # Combat has ended, we have a winner.
         return game_state.winner
-
-    def simulate_averaging(self, first_to_act=None, debug=True):
-        """Simulation a single combat in which all d20 rolls are averaged.
-        """
-        if first_to_act is None:
-            first_to_act = random.randint(1, 2)
-        turn_order = [self.unit1, self.unit2]
-        # Randomize turn order, if needed.
-        if first_to_act == 2:
-            turn_order.reverse()
-
-        game_state = AveragingVersusGameState(turn_order, self.distance, debug=debug)
-        game_state.run_combat()
-
-        # Combat has ended, we have a winner.
-        return game_state

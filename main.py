@@ -3,7 +3,7 @@ from collections import defaultdict
 from versus_game_state import VersusGameState, AveragingVersusGameState
 from versus_simulator import VersusSimulator
 from unit_factory import UnitFactory
-from strategy import MeleeRangedStrategy, InvalidVariant
+from strategy import MeleeRangedStrategy
 
 import rules
 import utils
@@ -12,17 +12,13 @@ def determine_optimum_strategies(unit1, unit2):
     outcomes = defaultdict(dict)
 
     for v1 in MeleeRangedStrategy.VARIANTS:
-        try:
-            strategy = MeleeRangedStrategy(unit1, v1)
-        except InvalidVariant:
+        if not MeleeRangedStrategy.is_compatible(unit1, v1):
             continue
-        unit1.strategy = strategy
+        unit1.strategy = MeleeRangedStrategy(unit1, v1)
         for v2 in MeleeRangedStrategy.VARIANTS:
-            try:
-                strategy = MeleeRangedStrategy(unit2, v2)
-            except InvalidVariant:
+            if not MeleeRangedStrategy.is_compatible(unit2, v2):
                 continue
-            unit2.strategy = strategy
+            unit2.strategy = MeleeRangedStrategy(unit2, v2)
 
             turn_order = (unit1, unit2)
             game_state = AveragingVersusGameState(turn_order, verbosity=0)
@@ -80,5 +76,8 @@ def main():
 
 
 if __name__ == '__main__':
-    determine_optimum_strategies(UnitFactory.create_hybrid(), UnitFactory.create_hybrid())
-    # main()
+    unit1 = UnitFactory.create_hybrid()
+    unit2 = UnitFactory.create_warrior()
+    determine_optimum_strategies(unit1, unit2)
+    determine_optimum_strategies(unit2, unit1)
+    main()
