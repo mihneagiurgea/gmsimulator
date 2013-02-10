@@ -13,7 +13,7 @@ class VersusGameState(object):
 
     def __init__(self, units, distance):
         self.units = units
-        self.current_hp = { unit: unit.hp for unit in self.units }
+        self._current_hp = { unit: unit.hp for unit in self.units }
         self.distance = distance
         self.round = 1
         self._active_turn = 0
@@ -29,9 +29,13 @@ class VersusGameState(object):
     def __repr__(self):
         return '<%s Round %d: %s HP vs %s HP, distance: %d>' % \
             (self.__class__.__name__, self.round,
-             self.current_hp[self.units[0]],
-             self.current_hp[self.units[1]],
+             self._current_hp[self.units[0]],
+             self._current_hp[self.units[1]],
              self.distance)
+
+    def __getitem__(self, unit):
+        """Returns the current HP of a unit."""
+        return self._current_hp[unit]
 
     def get_opponent(self, unit):
         if unit == self.units[0]:
@@ -45,7 +49,7 @@ class VersusGameState(object):
 
     @property
     def alive(self):
-        min_hp = min(self.current_hp.itervalues())
+        min_hp = min(self._current_hp.itervalues())
         if min_hp > 0:
             return True
         else:
@@ -53,15 +57,15 @@ class VersusGameState(object):
 
     @property
     def winner(self):
-        max_hp = max(self.current_hp.itervalues())
-        for unit, hp in self.current_hp.iteritems():
+        max_hp = max(self._current_hp.itervalues())
+        for unit, hp in self._current_hp.iteritems():
             if hp == max_hp:
                 return unit
 
     """Game actions - they might belong in a different class. """
 
     def _deal_damage(self, unit, value):
-        self.current_hp[unit] -= value
+        self._current_hp[unit] -= value
         # print '%s was dealt %d damage' % (unit, value)
 
     def move_towards(self, unit, distance):
@@ -98,33 +102,58 @@ class VersusGameState(object):
     def _process_single_melee_attack(self, attacker, wc_modifier=0):
         """Process a single melee attack."""
         defender = self.get_opponent(attacker)
-        if check_d20_roll(attacker.wc + wc_modifier, defender.ac):
-            attack_damage = attacker.damage
-            if check_d20_roll(attacker.critical_strike, 21):
-                attack_damage *= 2
-            self._deal_damage(defender, attack_damage)
+        dmg = self._get_dmg_single_melee_attack(attacker, defender, wc_modifier)
+        if dmg is not None:
+            self._deal_damage(defender, dmg)
 
     def spell_cast(self, attacker):
         """Offensive spell cast."""
         defender = self.get_opponent(attacker)
+        dmg = self._get_dmg_spell_cast(attacker, defender)
+        if dmg is not None:
+            self._deal_damage(defender, dmg)
+
+    def _get_dmg_single_melee_attack(self, attacker, defender, wc_modifier=0):
+        """Computes the outcome of a single melee attack.
+
+        Returns:
+            The damage dealt, or None, if the attack was a miss.
+        """
+        if check_d20_roll(attacker.wc + wc_modifier, defender.ac):
+            if check_d20_roll(attacker.critical_strike, 21):
+                return attacker.damage * 2
+            else:
+                return attacker.damage
+        else:
+            return None
+
+    def _get_dmg_spell_cast(self, attacker, defender):
+        """Computes the outcome of a spell cast attack.
+
+        Returns:
+            The damage dealt, or None, if the attack was a miss.
+        """
         if check_d20_roll(0, defender.spell_resistance):
-            self._deal_damage(defender, attacker.spell_damage)
+            return attacker.spell_damage
+        else:
+            return None
 
     """ DPS - average Damage per Second (or Turn, in our case) """
 
     def get_dps_full_melee(self, attacker):
         """Compute the average DPS of a Full melee attack."""
         defender = self.get_opponent(attacker)
-        return ( self._get_dps_single_melee_attack(attacked, defender) +
-                 self._get_dps_single_melee_attack(attacked, defender, -5) )
+        return ( self._get_dps_single_melee_attack(attacker, defender) +
+                 self._get_dps_single_melee_attack(attacker, defender, -5) )
 
     def get_dps_charge(self, attacker):
         defender = self.get_opponent(attacker)
         return self._get_dps_single_melee_attack(attacked, defender, -2)
 
-    def get_dps_spell_cast(self, attacker):
+    def get_dps_spell_cast(self, attacker, defender=None):
         """Compute the average DPS of a Spell cast attack."""
-        defender = self.get_opponent(attacker)
+        if defender is None:
+            defender = self.get_opponent(attacker)
         hit_chance = d20_roll_hit_chance(0, defender.spell_resistance)
         return attacker.spell_damage * hit_chance
 

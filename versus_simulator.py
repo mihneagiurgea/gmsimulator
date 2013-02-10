@@ -48,7 +48,7 @@ class VersusSimulator(object):
         if first_to_act is None:
             first_to_act = random.randint(1, 2)
         turn_order = [self.unit1, self.unit2]
-        # Randomize turn order.
+        # Randomize turn order, if needed.
         if first_to_act == 2:
             turn_order.reverse()
 

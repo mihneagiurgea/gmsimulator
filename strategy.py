@@ -32,7 +32,13 @@ class MeleeRangedStrategy(object):
     HYBRID = 2
     PURE_MELEE = 3
 
-    def __init__(self, unit, switch_to_melee=HYBRID):
+    def __init__(self, unit, switch_to_melee=None):
+        if switch_to_melee is None:
+            if unit.damage == 0:
+                switch_to_melee = MeleeRangedStrategy.PURE_RANGED
+            if unit.spell_damage == 0:
+                switch_to_melee = MeleeRangedStrategy.PURE_MELEE
+
         self.switch_to_melee = switch_to_melee
 
     def _switch_to_melee(self, mid_range=False, long_range=False):
@@ -71,13 +77,13 @@ class MeleeRangedStrategy(object):
     def _act_long_range(self, unit, game_state):
         use_melee = self._switch_to_melee(long_range=True)
         if use_melee:
-            game_state.move_towards(unit)
+            game_state.move_towards(unit, unit.run_distance)
         else:
             game_state.spell_cast(unit)
 
     def act(self, unit, game_state):
         if game_state.distance == 1:
-            self._act_melee(unit, game_state)
+            self._act_adjacent(unit, game_state)
 
         elif game_state.distance <= unit.run_distance + 1:
             self._act_mid_range(unit, game_state)
