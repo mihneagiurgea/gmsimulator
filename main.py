@@ -2,7 +2,7 @@ from versus_simulator import VersusSimulator
 from unit_factory import UnitFactory
 
 def main():
-    unit1 = UnitFactory.create_hybrid()
+    unit1 = UnitFactory.create_mage()
     unit2 = UnitFactory.create_warrior()
 
     simulator = VersusSimulator(unit1, unit2)
@@ -33,8 +33,20 @@ def main():
         win_percentage = 100.0 * wins_count / total
         print '%15s with %.0f%%' % (winner, win_percentage)
 
-    print '\n=====Showing a single simulation=====\n'
-    simulator.simulate(verbosity=3)
+    wins_unit1 = a1w1 + a2w1
+    wins_unit2 = a1w2 + a2w2
+    if wins_unit1 > wins_unit2:
+        winner = unit1
+        wins_count = wins_unit1
+    else:
+        winner = unit2
+        wins_count = wins_unit2
+
+    win_percentage = 100.0 * wins_count / simulations_count
+    print 'Overall winner: %s (%.0f%%)' % (winner, win_percentage)
+
+    # print '\n=====Showing a single simulation=====\n'
+    # simulator.simulate(verbosity=3)
 
 if __name__ == '__main__':
     main()
